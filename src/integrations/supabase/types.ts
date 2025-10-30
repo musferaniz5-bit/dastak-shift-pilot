@@ -113,6 +113,7 @@ export type Database = {
         Row: {
           cash_collected: boolean
           cash_orders: number
+          chai_expense: number
           closing_balance: number
           commission: number
           created_at: string
@@ -120,6 +121,7 @@ export type Database = {
           id: string
           notes: string | null
           online_payment: number
+          online_payment_name: string | null
           open_balance: number
           orders_100: number
           orders_150: number
@@ -134,6 +136,7 @@ export type Database = {
         Insert: {
           cash_collected?: boolean
           cash_orders?: number
+          chai_expense?: number
           closing_balance?: number
           commission?: number
           created_at?: string
@@ -141,6 +144,7 @@ export type Database = {
           id?: string
           notes?: string | null
           online_payment?: number
+          online_payment_name?: string | null
           open_balance?: number
           orders_100?: number
           orders_150?: number
@@ -155,6 +159,7 @@ export type Database = {
         Update: {
           cash_collected?: boolean
           cash_orders?: number
+          chai_expense?: number
           closing_balance?: number
           commission?: number
           created_at?: string
@@ -162,6 +167,7 @@ export type Database = {
           id?: string
           notes?: string | null
           online_payment?: number
+          online_payment_name?: string | null
           open_balance?: number
           orders_100?: number
           orders_150?: number

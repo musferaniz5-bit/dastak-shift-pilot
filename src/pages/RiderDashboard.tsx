@@ -20,7 +20,9 @@ const RiderDashboard = () => {
   const [commission, setCommission] = useState("");
   const [otherFee, setOtherFee] = useState("");
   const [petrolExpense, setPetrolExpense] = useState("");
+  const [chaiExpense, setChaiExpense] = useState("");
   const [onlinePayment, setOnlinePayment] = useState("");
+  const [onlinePaymentName, setOnlinePaymentName] = useState("");
   const [cashOrders, setCashOrders] = useState("");
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -87,6 +89,7 @@ const RiderDashboard = () => {
       (parseInt(commission) || 0) +
       (parseInt(otherFee) || 0) -
       (parseInt(petrolExpense) || 0) -
+      (parseInt(chaiExpense) || 0) -
       (parseInt(cashOrders) || 0) -
       (parseInt(onlinePayment) || 0);
 
@@ -110,8 +113,10 @@ const RiderDashboard = () => {
         commission: parseInt(commission) || 0,
         other_fee: parseInt(otherFee) || 0,
         petrol_expense: parseInt(petrolExpense) || 0,
+        chai_expense: parseInt(chaiExpense) || 0,
         cash_orders: parseInt(cashOrders) || 0,
         online_payment: parseInt(onlinePayment) || 0,
+        online_payment_name: onlinePaymentName,
         closing_balance: closingBalance,
         notes,
         status: "open",
@@ -128,7 +133,9 @@ const RiderDashboard = () => {
       setCommission("");
       setOtherFee("");
       setPetrolExpense("");
+      setChaiExpense("");
       setOnlinePayment("");
+      setOnlinePaymentName("");
       setCashOrders("");
       setNotes("");
     } catch (error: any) {
@@ -248,6 +255,19 @@ const RiderDashboard = () => {
                   />
                 </div>
                 <div className="space-y-2">
+                  <Label htmlFor="chaiExpense">Chai Expense (Rs)</Label>
+                  <Input
+                    id="chaiExpense"
+                    type="number"
+                    value={chaiExpense}
+                    onChange={(e) => setChaiExpense(e.target.value)}
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
                   <Label htmlFor="onlinePayment">Online Payment (Rs)</Label>
                   <Input
                     id="onlinePayment"
@@ -255,6 +275,16 @@ const RiderDashboard = () => {
                     value={onlinePayment}
                     onChange={(e) => setOnlinePayment(e.target.value)}
                     placeholder="0"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="onlinePaymentName">Online Payment Name</Label>
+                  <Input
+                    id="onlinePaymentName"
+                    type="text"
+                    value={onlinePaymentName}
+                    onChange={(e) => setOnlinePaymentName(e.target.value)}
+                    placeholder="Customer name"
                   />
                 </div>
               </div>
