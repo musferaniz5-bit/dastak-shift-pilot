@@ -32,10 +32,13 @@ const AdminDashboard = () => {
 
     if (entries) {
       const totalOrders = entries.reduce((sum, e) => sum + e.orders_60 + e.orders_100 + e.orders_150, 0);
-      const totalOnline = entries.reduce((sum, e) => sum + e.online_payment, 0);
-      const totalCash = entries.reduce((sum, e) => sum + e.cash_orders, 0);
+      const totalOnline = entries.reduce((sum, e) => {
+        const payments = e.online_payments as Array<{name: string, amount: number}> || [];
+        return sum + payments.reduce((pSum, p) => pSum + p.amount, 0);
+      }, 0);
+      const totalCash = entries.reduce((sum, e) => sum + e.other_expense_amount, 0);
       const totalCommission = entries.reduce((sum, e) => sum + e.commission, 0);
-      const totalExpenses = entries.reduce((sum, e) => sum + e.petrol_expense + e.other_fee, 0);
+      const totalExpenses = entries.reduce((sum, e) => sum + e.petrol_expense + e.chai_expense + e.other_fee, 0);
 
       setStats({ totalOrders, totalOnline, totalCash, totalCommission, totalExpenses });
     }
@@ -80,7 +83,7 @@ const AdminDashboard = () => {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Cash Collected</CardTitle>
+              <CardTitle className="text-sm font-medium">Other Expense</CardTitle>
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>

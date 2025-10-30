@@ -52,7 +52,7 @@ const RiderEntriesTable = ({ onUpdate }: RiderEntriesTableProps) => {
     const { error } = await supabase
       .from("rider_entries")
       .update({ 
-        cash_orders: 0,
+        other_expense_amount: 0,
         cash_collected: true 
       })
       .eq("id", entryId);
@@ -81,56 +81,80 @@ const RiderEntriesTable = ({ onUpdate }: RiderEntriesTableProps) => {
                 <TableHead>Date</TableHead>
                 <TableHead>Shift</TableHead>
                 <TableHead>Orders</TableHead>
-                <TableHead>Cash Orders</TableHead>
-                <TableHead>Online</TableHead>
+                <TableHead>Other Expense</TableHead>
+                <TableHead>Online Payments</TableHead>
                 <TableHead>Closing Balance</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {entries.map((entry) => (
-                <TableRow key={entry.id}>
-                  <TableCell className="font-medium">{entry.profiles?.full_name}</TableCell>
-                  <TableCell>{new Date(entry.entry_date).toLocaleDateString()}</TableCell>
-                  <TableCell>
-                    <Badge variant={entry.shift === "day" ? "default" : "secondary"}>
-                      {entry.shift}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{entry.orders_60 + entry.orders_100 + entry.orders_150}</TableCell>
-                  <TableCell>Rs {entry.cash_orders}</TableCell>
-                  <TableCell>Rs {entry.online_payment}</TableCell>
-                  <TableCell className="font-bold">Rs {entry.closing_balance}</TableCell>
-                  <TableCell>
-                    <Badge variant={entry.status === "open" ? "destructive" : "default"}>
-                      {entry.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      {entry.status === "open" && (
-                        <Button
-                          size="sm"
-                          onClick={() => handleCloseShift(entry.id, entry.rider_id, entry.closing_balance)}
-                        >
-                          <CheckCircle className="mr-1 h-4 w-4" />
-                          Close
-                        </Button>
+              {entries.map((entry) => {
+                const onlinePayments = entry.online_payments as Array<{name: string, amount: number}> || [];
+                const totalOnline = onlinePayments.reduce((sum, p) => sum + p.amount, 0);
+                
+                return (
+                  <TableRow key={entry.id}>
+                    <TableCell className="font-medium">{entry.profiles?.full_name}</TableCell>
+                    <TableCell>{new Date(entry.entry_date).toLocaleDateString()}</TableCell>
+                    <TableCell>
+                      <Badge variant={entry.shift === "day" ? "default" : "secondary"}>
+                        {entry.shift}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{entry.orders_60 + entry.orders_100 + entry.orders_150}</TableCell>
+                    <TableCell>
+                      {entry.other_expense_name ? (
+                        <span>{entry.other_expense_name}: Rs {entry.other_expense_amount}</span>
+                      ) : (
+                        <span>Rs {entry.other_expense_amount}</span>
                       )}
-                      {entry.cash_orders > 0 && !entry.cash_collected && (
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          onClick={() => handleCollectCash(entry.id)}
-                        >
-                          Collect Cash
-                        </Button>
+                    </TableCell>
+                    <TableCell>
+                      {onlinePayments.length > 0 ? (
+                        <div className="space-y-1">
+                          {onlinePayments.map((p, i) => (
+                            <div key={i} className="text-sm">
+                              {p.name}: Rs {p.amount}
+                            </div>
+                          ))}
+                          <div className="font-bold text-sm border-t pt-1">Total: Rs {totalOnline}</div>
+                        </div>
+                      ) : (
+                        <span>Rs 0</span>
                       )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+                    </TableCell>
+                    <TableCell className="font-bold">Rs {entry.closing_balance}</TableCell>
+                    <TableCell>
+                      <Badge variant={entry.status === "open" ? "destructive" : "default"}>
+                        {entry.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        {entry.status === "open" && (
+                          <Button
+                            size="sm"
+                            onClick={() => handleCloseShift(entry.id, entry.rider_id, entry.closing_balance)}
+                          >
+                            <CheckCircle className="mr-1 h-4 w-4" />
+                            Close
+                          </Button>
+                        )}
+                        {entry.other_expense_amount > 0 && !entry.cash_collected && (
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => handleCollectCash(entry.id)}
+                          >
+                            Collect Cash
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </div>

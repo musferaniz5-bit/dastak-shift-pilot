@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { LogOut, Sun, Moon } from "lucide-react";
+import { LogOut, Sun, Moon, Plus, Trash2 } from "lucide-react";
 
 const RiderDashboard = () => {
   const navigate = useNavigate();
@@ -21,9 +21,9 @@ const RiderDashboard = () => {
   const [otherFee, setOtherFee] = useState("");
   const [petrolExpense, setPetrolExpense] = useState("");
   const [chaiExpense, setChaiExpense] = useState("");
-  const [onlinePayment, setOnlinePayment] = useState("");
-  const [onlinePaymentName, setOnlinePaymentName] = useState("");
-  const [cashOrders, setCashOrders] = useState("");
+  const [otherExpenseName, setOtherExpenseName] = useState("");
+  const [otherExpenseAmount, setOtherExpenseAmount] = useState("");
+  const [onlinePayments, setOnlinePayments] = useState<Array<{name: string, amount: string}>>([{name: "", amount: ""}]);
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderSettings, setOrderSettings] = useState({ fee_60: 60, fee_100: 100, fee_150: 150 });
@@ -83,6 +83,10 @@ const RiderDashboard = () => {
       (parseInt(orders100) || 0) * orderSettings.fee_100 +
       (parseInt(orders150) || 0) * orderSettings.fee_150;
 
+    const totalOnlinePayments = onlinePayments.reduce((sum, payment) => 
+      sum + (parseInt(payment.amount) || 0), 0
+    );
+
     const closingBalance =
       (parseInt(openBalance) || 0) +
       baseTotal +
@@ -90,10 +94,26 @@ const RiderDashboard = () => {
       (parseInt(otherFee) || 0) -
       (parseInt(petrolExpense) || 0) -
       (parseInt(chaiExpense) || 0) -
-      (parseInt(cashOrders) || 0) -
-      (parseInt(onlinePayment) || 0);
+      (parseInt(otherExpenseAmount) || 0) +
+      totalOnlinePayments;
 
     return { baseTotal, closingBalance };
+  };
+
+  const addOnlinePayment = () => {
+    setOnlinePayments([...onlinePayments, {name: "", amount: ""}]);
+  };
+
+  const removeOnlinePayment = (index: number) => {
+    if (onlinePayments.length > 1) {
+      setOnlinePayments(onlinePayments.filter((_, i) => i !== index));
+    }
+  };
+
+  const updateOnlinePayment = (index: number, field: 'name' | 'amount', value: string) => {
+    const updated = [...onlinePayments];
+    updated[index][field] = value;
+    setOnlinePayments(updated);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -102,6 +122,10 @@ const RiderDashboard = () => {
 
     try {
       const { closingBalance } = calculateTotals();
+
+      const paymentsData = onlinePayments
+        .filter(p => p.name.trim() && p.amount)
+        .map(p => ({name: p.name, amount: parseInt(p.amount) || 0}));
 
       const { error } = await supabase.from("rider_entries").insert({
         rider_id: userId,
@@ -114,9 +138,9 @@ const RiderDashboard = () => {
         other_fee: parseInt(otherFee) || 0,
         petrol_expense: parseInt(petrolExpense) || 0,
         chai_expense: parseInt(chaiExpense) || 0,
-        cash_orders: parseInt(cashOrders) || 0,
-        online_payment: parseInt(onlinePayment) || 0,
-        online_payment_name: onlinePaymentName,
+        other_expense_name: otherExpenseName,
+        other_expense_amount: parseInt(otherExpenseAmount) || 0,
+        online_payments: paymentsData,
         closing_balance: closingBalance,
         notes,
         status: "open",
@@ -134,9 +158,9 @@ const RiderDashboard = () => {
       setOtherFee("");
       setPetrolExpense("");
       setChaiExpense("");
-      setOnlinePayment("");
-      setOnlinePaymentName("");
-      setCashOrders("");
+      setOtherExpenseName("");
+      setOtherExpenseAmount("");
+      setOnlinePayments([{name: "", amount: ""}]);
       setNotes("");
     } catch (error: any) {
       toast.error(error.message || "Failed to submit report");
@@ -268,36 +292,69 @@ const RiderDashboard = () => {
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="onlinePayment">Online Payment (Rs)</Label>
+                  <Label htmlFor="otherExpenseName">Other Expense Name</Label>
                   <Input
-                    id="onlinePayment"
-                    type="number"
-                    value={onlinePayment}
-                    onChange={(e) => setOnlinePayment(e.target.value)}
-                    placeholder="0"
+                    id="otherExpenseName"
+                    type="text"
+                    value={otherExpenseName}
+                    onChange={(e) => setOtherExpenseName(e.target.value)}
+                    placeholder="e.g., Maintenance, Toll"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="onlinePaymentName">Online Payment Name</Label>
+                  <Label htmlFor="otherExpenseAmount">Other Expense Amount (Rs)</Label>
                   <Input
-                    id="onlinePaymentName"
-                    type="text"
-                    value={onlinePaymentName}
-                    onChange={(e) => setOnlinePaymentName(e.target.value)}
-                    placeholder="Customer name"
+                    id="otherExpenseAmount"
+                    type="number"
+                    value={otherExpenseAmount}
+                    onChange={(e) => setOtherExpenseAmount(e.target.value)}
+                    placeholder="0"
                   />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="cashOrders">Cash Orders (Rs)</Label>
-                <Input
-                  id="cashOrders"
-                  type="number"
-                  value={cashOrders}
-                  onChange={(e) => setCashOrders(e.target.value)}
-                  placeholder="0"
-                />
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label>Online Payments</Label>
+                  <Button type="button" size="sm" onClick={addOnlinePayment} variant="outline">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Payment
+                  </Button>
+                </div>
+                {onlinePayments.map((payment, index) => (
+                  <div key={index} className="grid gap-4 md:grid-cols-[1fr_1fr_auto] items-end">
+                    <div className="space-y-2">
+                      <Label htmlFor={`paymentName${index}`}>Name</Label>
+                      <Input
+                        id={`paymentName${index}`}
+                        type="text"
+                        value={payment.name}
+                        onChange={(e) => updateOnlinePayment(index, 'name', e.target.value)}
+                        placeholder="Customer name"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor={`paymentAmount${index}`}>Amount (Rs)</Label>
+                      <Input
+                        id={`paymentAmount${index}`}
+                        type="number"
+                        value={payment.amount}
+                        onChange={(e) => updateOnlinePayment(index, 'amount', e.target.value)}
+                        placeholder="0"
+                      />
+                    </div>
+                    {onlinePayments.length > 1 && (
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => removeOnlinePayment(index)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
               </div>
 
               <div className="space-y-2">

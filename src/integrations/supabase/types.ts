@@ -112,7 +112,6 @@ export type Database = {
       rider_entries: {
         Row: {
           cash_collected: boolean
-          cash_orders: number
           chai_expense: number
           closing_balance: number
           commission: number
@@ -120,12 +119,13 @@ export type Database = {
           entry_date: string
           id: string
           notes: string | null
-          online_payment: number
-          online_payment_name: string | null
+          online_payments: Json | null
           open_balance: number
           orders_100: number
           orders_150: number
           orders_60: number
+          other_expense_amount: number
+          other_expense_name: string | null
           other_fee: number
           petrol_expense: number
           rider_id: string
@@ -135,7 +135,6 @@ export type Database = {
         }
         Insert: {
           cash_collected?: boolean
-          cash_orders?: number
           chai_expense?: number
           closing_balance?: number
           commission?: number
@@ -143,12 +142,13 @@ export type Database = {
           entry_date?: string
           id?: string
           notes?: string | null
-          online_payment?: number
-          online_payment_name?: string | null
+          online_payments?: Json | null
           open_balance?: number
           orders_100?: number
           orders_150?: number
           orders_60?: number
+          other_expense_amount?: number
+          other_expense_name?: string | null
           other_fee?: number
           petrol_expense?: number
           rider_id: string
@@ -158,7 +158,6 @@ export type Database = {
         }
         Update: {
           cash_collected?: boolean
-          cash_orders?: number
           chai_expense?: number
           closing_balance?: number
           commission?: number
@@ -166,12 +165,13 @@ export type Database = {
           entry_date?: string
           id?: string
           notes?: string | null
-          online_payment?: number
-          online_payment_name?: string | null
+          online_payments?: Json | null
           open_balance?: number
           orders_100?: number
           orders_150?: number
           orders_60?: number
+          other_expense_amount?: number
+          other_expense_name?: string | null
           other_fee?: number
           petrol_expense?: number
           rider_id?: string
