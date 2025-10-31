@@ -90,7 +90,16 @@ const RiderEntriesTable = ({ onUpdate }: RiderEntriesTableProps) => {
             </TableHeader>
             <TableBody>
               {entries.map((entry) => {
-                const onlinePayments = entry.online_payments as Array<{name: string, amount: number}> || [];
+    // Defensive JSONB parsing with validation
+    const onlinePayments = Array.isArray(entry.online_payments)
+      ? entry.online_payments.filter((p: any) =>
+          p && 
+          typeof p === 'object' && 
+          typeof p.name === 'string' && 
+          typeof p.amount === 'number' &&
+          p.amount >= 0
+        )
+      : [];
                 const totalOnline = onlinePayments.reduce((sum, p) => sum + p.amount, 0);
                 
                 return (
